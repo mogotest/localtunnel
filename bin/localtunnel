@@ -26,22 +26,41 @@ require 'rubygems'
 require 'optparse'
 require 'localtunnel'
 
-key = nil
+api_host = "mogotest.com"
+tunnel_host = "open.mogotunnel.com"
+public_ssh_key = nil
+
 options = OptionParser.new do |o|
-  o.banner = "Usage: localtunnel [options] <localport>"
+  o.banner = "Usage: mogotest [options] <mogotest_api_key> <hostname_to_test> <local_port>"
+
   o.on("-k", "--key FILE", "upload a public key for authentication") do |k|
-    key = File.exist?(k.to_s) ? File.open(k).read : nil
+    public_ssh_key = File.exist?(k.to_s) ? File.open(k).read : nil
   end
+
+  o.on("--tunnel_host HOST", "connect to the named tunnel host") do |t|
+    tunnel_host = t
+  end
+
+  o.on("--api_host HOST", "connect to the named API host for registration") do |a|
+    api_host = a
+  end
+
   o.on('-h', "--help", "show this help") { puts o; exit }
 end
 
 args = options.parse!
-local_port = args[0]
-unless local_port
+api_key = args[0]
+test_host = args[1]
+local_port = args[2]
+unless api_key && test_host && local_port
   puts options
   exit
 end
 
-t = LocalTunnel::Tunnel.new(local_port, key)
-t.register_tunnel
-t.start_tunnel
+x = LocalTunnel.new(tunnel_host, api_key, test_host, local_port, public_ssh_key)
+x.register_tunnel
+x.notify_mogotest_of_tunnel
+x.start_tunnel
+
+# start_tunnel blocks until the user sends an interrupt.  At that point, execution will resume here.
+x.teardown_tunnel_in_mogotest
