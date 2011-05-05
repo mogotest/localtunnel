@@ -1,6 +1,7 @@
 Rakefile
-lib/localtunnel.rb
+lib/mogotest.rb
 lib/localtunnel/tunnel.rb
 lib/localtunnel/net_ssh_gateway_patch.rb
-bin/localtunnel
+lib/mogotest/tunnel.rb
+bin/mogotest
 Manifest

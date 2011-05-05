@@ -24,7 +24,7 @@
 
 require 'rubygems'
 require 'optparse'
-require 'localtunnel'
+require 'mogotest'
 
 api_host = "mogotest.com"
 tunnel_host = "open.mogotunnel.com"
@@ -37,11 +37,11 @@ options = OptionParser.new do |o|
     public_ssh_key = File.exist?(k.to_s) ? File.open(k).read : nil
   end
 
-  o.on("--tunnel_host HOST", "connect to the named tunnel host") do |t|
+  o.on("--tunnel_host HOST", "connect to the named tunnel host (advanced debug mode)") do |t|
     tunnel_host = t
   end
 
-  o.on("--api_host HOST", "connect to the named API host for registration") do |a|
+  o.on("--api_host HOST", "connect to the named API host for registration (advanced debug mode)") do |a|
     api_host = a
   end
 
@@ -57,10 +57,13 @@ unless api_key && test_host && local_port
   exit
 end
 
-x = LocalTunnel.new(tunnel_host, api_key, test_host, local_port, public_ssh_key)
-x.register_tunnel
-x.notify_mogotest_of_tunnel
-x.start_tunnel
+x = LocalTunnel::Tunnel.new(tunnel_host, local_port, public_ssh_key)
+response = x.register_tunnel
+
+m = Mogotest::Tunnel.new(api_host, api_key, test_host, response['host'])
+m.notify_mogotest_of_tunnel
+
+x.start_tunnel(m)
 
 # start_tunnel blocks until the user sends an interrupt.  At that point, execution will resume here.
-x.teardown_tunnel_in_mogotest
+m.teardown_tunnel_in_mogotest
