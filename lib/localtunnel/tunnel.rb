@@ -49,7 +49,6 @@ class LocalTunnel::Tunnel
         sleep 1 while true
       rescue Interrupt
         gateway.close_remote(rp, rh)
-        exit
       end
     end
   rescue Net::SSH::AuthenticationFailed
