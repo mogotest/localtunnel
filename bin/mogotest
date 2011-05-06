@@ -27,7 +27,7 @@ require 'optparse'
 require 'mogotest'
 
 api_host = "mogotest.com"
-tunnel_host = "open.mogotunnel.com"
+tunnel_host = "open.mogotunnel.com:8888"
 public_ssh_key = nil
 
 options = OptionParser.new do |o|
