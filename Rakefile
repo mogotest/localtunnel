@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'echoe'
 
-Echoe.new('mogotest', '0.9') do |p|
+Echoe.new('mogotest', '0.9.1') do |p|
   p.description    = "Test your local Web servers on Mogotest without poking a hole in your firewall."
   p.url            = "http://mogotest.com"
   p.author         = "Jeff Lindsay"
