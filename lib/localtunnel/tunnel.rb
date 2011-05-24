@@ -11,11 +11,12 @@ module LocalTunnel; end
 
 class LocalTunnel::Tunnel
 
-  attr_accessor :tunnel_host, :port, :key, :host
+  attr_accessor :tunnel_host, :reflected_host, :reflected_port, :key, :host
 
-  def initialize(tunnel_host, port, key)
+  def initialize(tunnel_host, reflected_host, reflected_port, key)
     @tunnel_host = tunnel_host
-    @port = port
+    @reflected_host = reflected_host
+    @reflected_port = reflected_port
     @key  = key
     @host = ""
   end
@@ -31,7 +32,7 @@ class LocalTunnel::Tunnel
       puts "   [Error] #{resp['error']}"
       exit
     end
-    @host = resp['host'].split(':').first
+    @ssh_host = resp['host'].split(':').first
     @tunnel = resp
     return resp
   rescue
@@ -40,11 +41,10 @@ class LocalTunnel::Tunnel
   end
 
   def start_tunnel(mogotest)
-    port = @port
     tunnel = @tunnel
-    gateway = Net::SSH::Gateway.new(@host, tunnel['user'])
-    gateway.open_remote(port.to_i, '127.0.0.1', tunnel['through_port'].to_i) do |rp,rh|
-      puts "   You're good to go. Any tests you run against '#{mogotest.test_host}' on Mogotest will now access your local server on port #{port}."
+    gateway = Net::SSH::Gateway.new(@ssh_host, tunnel['user'])
+    gateway.open_remote(reflected_port.to_i, reflected_host, tunnel['through_port'].to_i) do |rp,rh|
+      puts "   You're good to go. Any tests you run against '#{mogotest.test_host}' on Mogotest will now access the site running on #{reflected_host}:#{reflected_port}."
       begin
         sleep 1 while true
       rescue Interrupt

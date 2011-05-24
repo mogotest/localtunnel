@@ -51,13 +51,22 @@ end
 args = options.parse!
 api_key = args[0]
 test_host = args[1]
-local_port = args[2]
-unless api_key && test_host && local_port
+reflected_connection = args[2]
+unless api_key && test_host && reflected_connection
   puts options
   exit
 end
 
-x = LocalTunnel::Tunnel.new(tunnel_host, local_port, public_ssh_key)
+reflected_connection_parts = reflected_connection.split(':')
+if reflected_connection_parts.size == 2
+  reflected_host = reflected_connection_parts.first
+  reflected_port = reflected_connection_parts.last
+else
+  reflected_host = '127.0.0.1'
+  reflected_port = reflected_connection_parts.first
+end
+
+x = LocalTunnel::Tunnel.new(tunnel_host, reflected_host, reflected_port, public_ssh_key)
 response = x.register_tunnel
 
 m = Mogotest::Tunnel.new(api_host, api_key, test_host, response['host'])
